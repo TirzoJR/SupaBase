@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('./config/db');
 
 // Inicializar la aplicación
 const app = express();
