@@ -1,11 +1,5 @@
 import { Router } from 'express';
-import { 
-    getHorasPorCarrera, 
-    getUsoLaboratorios, 
-    getHorasDocentePorMateria, 
-    getHorasMateriaPorPeriodo 
-} from './estadisticas.controller.js';
-
+import { getHorasPorCarrera, getUsoLaboratorios, getHorasDocentePorMateria, getHorasMateriaPorPeriodo, getUsoLaboratorioDetallado } from './estadisticas.controller.js';
 const router = Router();
 
 router.get('/carreras', getHorasPorCarrera);
