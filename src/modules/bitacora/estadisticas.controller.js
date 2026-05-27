@@ -66,3 +66,30 @@ export const getHorasMateriaPorPeriodo = async (req, res) => {
         res.status(500).json({ ok: false, error: "Error al filtrar por periodo", detalle: error.message });
     }
 };
+
+export const getUsoLaboratorioDetallado = async (req, res) => {
+    try {
+        // Sacamos el laboratorio de la URL (ej. /api/.../laboratorio/1/detalles)
+        const { laboratorio_id } = req.params; 
+        const { fecha_inicio, fecha_fin } = req.query;
+
+        if (!fecha_inicio || !fecha_fin) {
+            return res.status(400).json({ 
+                ok: false, 
+                mensaje: "Las fechas son obligatorias." 
+            });
+        }
+
+        const { data, error } = await supabase.rpc('get_uso_laboratorio_detallado', {
+            p_laboratorio: parseInt(laboratorio_id),
+            p_fecha_inicio: fecha_inicio,
+            p_fecha_fin: fecha_fin
+        });
+
+        if (error) throw error;
+        res.json({ ok: true, data });
+    } catch (error) {
+        console.error("Error en getUsoLaboratorioDetallado:", error);
+        res.status(500).json({ ok: false, error: "Error al obtener el desglose del laboratorio", detalle: error.message });
+    }
+};
