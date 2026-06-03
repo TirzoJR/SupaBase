@@ -1,25 +1,68 @@
 import { supabase } from "../../utils/supabaseCliente.js";
 
-const Obtenertodo = async (req,res) =>{
-    const {data,error} = await supabase.rpc("todo_carrera");
-    if(error) return res.status(400).json({error:error.message})
-    if(!data) return res.status(404).json({erro: "Sin Datos"})
+// ==========================================
+// Obtener todas las carreras
+// ==========================================
+
+// Función que consulta todas las carreras
+// utilizando una función RPC de Supabase.
+const Obtenertodo = async (req, res) => {
+
+    // Llamada al procedimiento almacenado "todo_carrera"
+    const { data, error } = await supabase.rpc("todo_carrera");
+
+    // Verifica si ocurrió un error
+    if (error)
+        return res.status(400).json({
+            error: error.message
+        });
+
+    // Verifica si no existen datos
+    if (!data)
+        return res.status(404).json({
+            erro: "Sin Datos"
+        });
+
+    // Retorna los datos obtenidos
     res.json(data);
+};
 
-}
+// ==========================================
+// Obtener bitácoras por fecha
+// ==========================================
 
-const BitacoraFecha = async (req,res) =>{
+// Función que obtiene registros de bitácora
+// filtrando por una fecha específica.
+const BitacoraFecha = async (req, res) => {
+
+    // Obtiene la fecha desde los parámetros de la URL
     const fecha = req.params.fecha;
-    const {data,error} = await supabase.rpc("bitacora_fecha",{
-        p_fecha : fecha,
-    }); 
-    
-    if(error)
-        return res.status(400).json({erro:error.message})
-    res.json(data)
-}
 
+    // Llama al procedimiento almacenado
+    // enviando la fecha como parámetro
+    const { data, error } = await supabase.rpc("bitacora_fecha", {
+        p_fecha: fecha,
+    });
+
+    // Verifica si ocurrió un error
+    if (error)
+        return res.status(400).json({
+            erro: error.message
+        });
+
+    // Retorna los datos encontrados
+    res.json(data);
+};
+
+// ==========================================
+// Registrar una nueva bitácora
+// ==========================================
+
+// Función encargada de registrar una bitácora
+// en la base de datos.
 const RegistrarBitacora = async (req, res) => {
+
+    // Se obtienen los datos enviados desde el body
     const {
         fecha,
         nombre_docente,
@@ -35,7 +78,10 @@ const RegistrarBitacora = async (req, res) => {
         firma,
     } = req.body;
 
+    // Arreglo para almacenar campos faltantes
     const camposFaltantes = [];
+
+    // Validación de campos obligatorios
     if (!fecha) camposFaltantes.push("fecha");
     if (!nombre_docente) camposFaltantes.push("nombre_docente");
     if (!materia) camposFaltantes.push("materia");
@@ -49,7 +95,10 @@ const RegistrarBitacora = async (req, res) => {
     if (!hora_salida) camposFaltantes.push("hora_salida");
     if (!firma) camposFaltantes.push("firma");
 
+    // Si existen campos faltantes,
+    // retorna un mensaje de error
     if (camposFaltantes.length > 0) {
+
         return res.status(400).json({
             ok: false,
             mensaje: `Faltan campos requeridos: ${camposFaltantes.join(", ")}.`,
@@ -57,7 +106,11 @@ const RegistrarBitacora = async (req, res) => {
     }
 
     try {
+
+        // Llamada al procedimiento almacenado
+        // para registrar la bitácora
         const { data, error } = await supabase.rpc("registrar_bita", {
+
             p_fecha: fecha,
             p_nombre_docente: nombre_docente,
             p_materia: materia,
@@ -72,48 +125,106 @@ const RegistrarBitacora = async (req, res) => {
             p_carrera: carrera,
         });
 
-        if (error) return res.status(400).json({ ok: false, mensaje: error.message });
-        return res.status(201).json({ ok: true, mensaje: "Bitácora registrada.", data });
+        // Verifica si ocurrió un error
+        if (error)
+            return res.status(400).json({
+                ok: false,
+                mensaje: error.message
+            });
+
+        // Retorna respuesta exitosa
+        return res.status(201).json({
+            ok: true,
+            mensaje: "Bitácora registrada.",
+            data
+        });
+
     } catch (error) {
+
+        // Captura errores internos del servidor
         console.error("Error en RegistrarBitacora:", error);
-        return res.status(500).json({ ok: false, mensaje: "Error interno del servidor." });
-    }
-}
 
+        return res.status(500).json({
+            ok: false,
+            mensaje: "Error interno del servidor."
+        });
+    }
+};
+
+// ==========================================
+// Obtener maestros
+// ==========================================
+
+// Función para obtener la lista de maestros
+// desde Supabase.
 const maestros = async (req, res) => {
+
     try {
-        const { data, error } = await supabase.rpc("obt_maestros")
 
+        // Llamada al procedimiento almacenado
+        const { data, error } = await supabase.rpc("obt_maestros");
+
+        // Si existe error, lo lanza
         if (error) throw error;
 
+        // Retorna los datos obtenidos
         return res.status(200).json(data);
 
     } catch (error) {
+
+        // Muestra el error en consola
         console.error("Error al obtener maestros:", error.message);
-        
-        return res.status(500).json({ 
+
+        // Retorna error del servidor
+        return res.status(500).json({
             error: "Hubo un problema al obtener los datos",
-            details: error.message 
+            details: error.message
         });
     }
 };
 
-const obtener_maestros = async(req,res)=>{
-     try {
-        const { data, error } = await supabase.rpc("obtener_maestros")
+// ==========================================
+// Obtener maestros (segunda consulta)
+// ==========================================
 
+// Función que obtiene maestros usando
+// otro procedimiento almacenado.
+const obtener_maestros = async (req, res) => {
+
+    try {
+
+        // Llamada al procedimiento almacenado
+        const { data, error } = await supabase.rpc("obtener_maestros");
+
+        // Si existe error, lo lanza
         if (error) throw error;
 
+        // Retorna los datos encontrados
         return res.status(200).json(data);
 
     } catch (error) {
+
+        // Muestra el error en consola
         console.error("Error al obtener maestros:", error.message);
-        
-        return res.status(500).json({ 
+
+        // Retorna error del servidor
+        return res.status(500).json({
             error: "Hubo un problema al obtener los datos",
-            details: error.message 
+            details: error.message
         });
     }
 };
 
-export default {Obtenertodo,BitacoraFecha,RegistrarBitacora,maestros,obtener_maestros}
+// ==========================================
+// Exportación de funciones
+// ==========================================
+
+// Se exportan todas las funciones
+// para poder utilizarlas en las rutas.
+export default {
+    Obtenertodo,
+    BitacoraFecha,
+    RegistrarBitacora,
+    maestros,
+    obtener_maestros
+};
