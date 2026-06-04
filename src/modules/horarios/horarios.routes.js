@@ -11,6 +11,9 @@ const router = express.Router();
 // ==========================================
 router.get("/materias", horario.materias);
 
+// ¡Ruta pública! Cualquier usuario o compañero del frontend puede consultarla sin token
+router.get("/:laboratorio", horario.obtenerLab);
+
 // ==========================================
 // Rutas privadas (Protegidas)
 // ==========================================
@@ -21,12 +24,6 @@ router.post(
     authMiddleware,
     verificarRol(ROLES.ADMINISTRADOR, ROLES.AYUDANTE_ADMIN),
     horario.registroHorario
-);
-
-router.get(
-    "/:laboratorio",
-    authMiddleware,
-    horario.obtenerLab
 );
 
 // Solo el Administrador principal debería poder borrar horarios
