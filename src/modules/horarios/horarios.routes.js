@@ -6,35 +6,13 @@ import rolesMiddleware from "../../middlewares/roles.middleware.js";
 const { verificarRol, ROLES } = rolesMiddleware;
 const router = express.Router();
 
-// ==========================================
-// Rutas públicas
-// ==========================================
-router.get("/materias", horario.materias);
+// Pública cualquiera puede consultar horarios
+router.get("/materias",horario.materias)
+// Privada  solo admin o ayudante pueden registrar horarios
+router.post("/registrar_horario", horario.registroHorario);
 
-// ==========================================
-// Rutas privadas (Protegidas)
-// ==========================================
+router.get("/:laboratorio", horario.obtenerLab);
 
-// Ahora SÍ exige Token y ser Admin/Ayudante para guardar nuevas clases
-router.post(
-    "/registrar_horario",
-    authMiddleware,
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.AYUDANTE_ADMIN),
-    horario.registroHorario
-);
-
-router.get(
-    "/:laboratorio",
-    authMiddleware,
-    horario.obtenerLab
-);
-
-// Solo el Administrador principal debería poder borrar horarios
-router.delete(
-    "/eliminar",
-    authMiddleware,
-    verificarRol(ROLES.ADMINISTRADOR),
-    horario.elimminarHora
-);
+router.delete("/eliminar",horario.elimminarHora)
 
 export default router;
